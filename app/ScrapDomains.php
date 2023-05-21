@@ -13,8 +13,6 @@ class ScrapDomains
         try {
             $domain = 'https://' . $domain;
 
-            $domain = 'https://bgtop.net/';
-
             $client = new Client(['base_uri' => $domain]);
             $getRequest = $client->request('GET');
             $content = $getRequest->getBody()->getContents();
