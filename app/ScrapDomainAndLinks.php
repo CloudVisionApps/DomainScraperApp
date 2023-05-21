@@ -28,6 +28,7 @@ class ScrapDomainAndLinks
 
             foreach ($dom->getElementsByTagName('a') as $node) {
                 $href = $node->getAttribute('href');
+
                 if (strpos($href, 'http') !== false) {
 
                     $domain = UrlHelper::getDomainFromUrl($href);

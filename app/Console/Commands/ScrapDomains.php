@@ -31,7 +31,6 @@ class ScrapDomains extends Command
      */
     public function handle()
     {
-
         while (true) {
             $links = [];
             $getDomains = Domain::all();
