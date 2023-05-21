@@ -12,11 +12,16 @@ class ScrapDomainAndLinks
     {
         try {
 
+            echo 'Scraping: ' . $link . "\n";
+
             $client = new Client(['base_uri' => $link]);
             $getRequest = $client->request('GET');
             $content = $getRequest->getBody()->getContents();
 
             libxml_use_internal_errors(true);
+
+
+            echo 'Parsing: ' . $link . "\n";
 
             $dom = new \DOMDocument();
             $dom->loadHTML('<!DOCTYPE html><meta charset="UTF-8">' . $content);
@@ -40,6 +45,9 @@ class ScrapDomainAndLinks
 
                     $findDomain = Domain::where('domain', $domain)->first();
                     if ($findDomain == null) {
+
+                        echo 'Save new domain: ' . $domain . "\n";
+
                         $findDomain = new Domain();
                         $findDomain->domain = $domain;
                     }
@@ -48,6 +56,9 @@ class ScrapDomainAndLinks
                     $findWebsiteLink = WebsiteLink::where('website_link', $href)->first();
                     if ($findWebsiteLink == null) {
                         $findWebsiteLink = new WebsiteLink();
+
+                        echo 'Save new website link: ' . $href . "\n";
+
                         $findWebsiteLink->website_link = $href;
                     }
 
