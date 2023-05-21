@@ -48,7 +48,11 @@ class ScrapDomains extends Command
                     if (strpos($href, 'http') !== false) {
 
                         $domain = UrlHelper::getDomainFromUrl($href);
+
                         if (empty(trim($domain))) {
+                            continue;
+                        }
+                        if (!UrlHelper::isValidDomainName($domain)) {
                             continue;
                         }
 
