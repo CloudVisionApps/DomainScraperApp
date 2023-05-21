@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('domains', function (Blueprint $table) {
             $table->id();
-            $table->text('domain');
-            $table->text('tld');
-            $table->text('domain_created_date');
-            $table->text('domain_expiry_date');
-            $table->text('domain_registrar');
-            $table->text('domain_registrar_url');
-            $table->text('domain_whois_server');
+            $table->text('domain')->nullable();
+            $table->text('tld')->nullable();
+            $table->text('domain_created_date')->nullable();
+            $table->text('domain_expiry_date')->nullable();
+            $table->text('domain_registrar')->nullable();
+            $table->text('domain_registrar_url')->nullable();
+            $table->text('domain_whois_server')->nullable();
             $table->timestamps();
         });
     }
