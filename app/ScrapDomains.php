@@ -11,6 +11,7 @@ class ScrapDomains
     public static function scrapDomain($domain)
     {
         try {
+            $domain = 'nova.bg';
             $domain = 'https://' . $domain;
 
             $client = new Client(['base_uri' => $domain]);
