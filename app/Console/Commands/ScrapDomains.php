@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Domain;
 use App\Models\WebsiteLink;
 use App\UrlHelper;
+use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
 class ScrapDomains extends Command
@@ -35,8 +36,11 @@ class ScrapDomains extends Command
         foreach ($getDomains as $domain) {
 
             try {
-                $domain = 'http://' . $domain->domain;
-                $content = file_get_contents($domain);
+                $domain = 'https://' . $domain->domain;
+
+                $client = new Client(['base_uri' => $domain]);
+                $getRequest = $client->request('GET');
+                $content = $getRequest->getBody()->getContents();
 
                 libxml_use_internal_errors(true);
 
@@ -48,11 +52,15 @@ class ScrapDomains extends Command
                     if (strpos($href, 'http') !== false) {
 
                         $domain = UrlHelper::getDomainFromUrl($href);
-
                         if (empty(trim($domain))) {
                             continue;
                         }
+
                         if (!UrlHelper::isValidDomainName($domain)) {
+                            continue;
+                        }
+
+                        if (UrlHelper::isSubDomainName($domain)) {
                             continue;
                         }
 
@@ -74,6 +82,7 @@ class ScrapDomains extends Command
                     }
                 }
             } catch (\Exception $e) {
+                echo $e->getMessage() . "\n";
                 continue;
             }
         }

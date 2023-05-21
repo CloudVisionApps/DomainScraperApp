@@ -11,6 +11,16 @@ class UrlHelper
             && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $domainName)   ); //length of each label
     }
 
+    public static function isSubDomainName($domainName)
+    {
+        $exp = explode('.', $domainName);
+        if (count($exp) > 2) {
+            return true;
+        }
+
+        return false;
+    }
+
     public static function getDomainFromUrl($url){
 
         $parse = parse_url($url);
