@@ -33,9 +33,17 @@ class ScrapDomains extends Command
     {
 
         while (true) {
+            $links = [];
             $getDomains = Domain::all();
             foreach ($getDomains as $domain) {
-                \App\ScrapDomains::scrapDomain($domain->domain);
+                $links[] = 'https://' . $domain->domain;
+            }
+            $getWebsiteLinks = WebsiteLink::all();
+            foreach ($getWebsiteLinks as $websiteLink) {
+                $links[] = $websiteLink->website_link;
+            }
+            foreach ($links as $link) {
+                \App\ScrapDomainAndLinks::scrap($link);
                 sleep(rand(1,4));
             }
         }

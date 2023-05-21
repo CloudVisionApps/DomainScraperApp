@@ -6,15 +6,13 @@ use App\Models\Domain;
 use App\Models\WebsiteLink;
 use GuzzleHttp\Client;
 
-class ScrapDomains
+class ScrapDomainAndLinks
 {
-    public static function scrapDomain($domain)
+    public static function scrap($link)
     {
         try {
-            $domain = 'nova.bg';
-            $domain = 'https://' . $domain;
 
-            $client = new Client(['base_uri' => $domain]);
+            $client = new Client(['base_uri' => $link]);
             $getRequest = $client->request('GET');
             $content = $getRequest->getBody()->getContents();
 
