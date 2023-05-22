@@ -26,82 +26,84 @@ class ExampleTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) {
 
-            $getWebsiteLinks = WebsiteLink::limit(500)
-                ->where(function ($query) {
-                    $query->whereNull('website_last_scrape_date')
-                        ->orWhere('website_last_scrape_date', '<', Carbon::now()->subDays(1));
-                })
-                ->orderBy('id', 'desc')
-                ->get();
+            while(true) {
+                $getWebsiteLinks = WebsiteLink::limit(1)
+                    ->where(function ($query) {
+                        $query->whereNull('website_last_scrape_date')
+                            ->orWhere('website_last_scrape_date', '<', Carbon::now()->subDays(1));
+                    })
+                    ->orderBy('id', 'desc')
+                    ->get();
 
-            foreach ($getWebsiteLinks as $websiteLink) {
+                foreach ($getWebsiteLinks as $websiteLink) {
 
-                try {
-                    $browser->visit($websiteLink->website_link);
+                    try {
+                        $browser->visit($websiteLink->website_link);
 
-                    // Mark as scraped
-                    $websiteLink->website_last_scrape_date = Carbon::now();
-                    $websiteLink->save();
+                        // Mark as scraped
+                        $websiteLink->website_last_scrape_date = Carbon::now();
+                        $websiteLink->save();
 
-                    $websiteLinkDomain = UrlHelper::getDomainFromUrl($websiteLink->website_link);
-                    if (empty(trim($websiteLinkDomain))) {
-                        continue;
-                    }
-                    $websiteLinkDomain = 'https://' . $websiteLinkDomain;
+                        $websiteLinkDomain = UrlHelper::getDomainFromUrl($websiteLink->website_link);
+                        if (empty(trim($websiteLinkDomain))) {
+                            continue;
+                        }
+                        $websiteLinkDomain = 'https://' . $websiteLinkDomain;
 
-                    $pageLinks = $browser->elements('a');
-                    foreach ($pageLinks as $pageLink) {
+                        $pageLinks = $browser->elements('a');
+                        foreach ($pageLinks as $pageLink) {
 
-                        if (strpos($pageLink->getAttribute('href'), 'http') !== false) {
-                            $pageLinkReady = $pageLink->getAttribute('href');
-                        } else {
-                            $href = $pageLink->getAttribute('href');
-                            if (strpos($href, '/') !== false) {
-                                $pageLinkReady = $websiteLinkDomain . $href;
+                            if (strpos($pageLink->getAttribute('href'), 'http') !== false) {
+                                $pageLinkReady = $pageLink->getAttribute('href');
                             } else {
-                                $pageLinkReady = $websiteLinkDomain .'/'. $href;
+                                $href = $pageLink->getAttribute('href');
+                                if (strpos($href, '/') !== false) {
+                                    $pageLinkReady = $websiteLinkDomain . $href;
+                                } else {
+                                    $pageLinkReady = $websiteLinkDomain . '/' . $href;
+                                }
                             }
-                        }
 ///////////////////////////////////////////////////////////////////////////////////
 
-                        $domain = UrlHelper::getDomainFromUrl($pageLinkReady);
-                        if (empty(trim($domain))) {
-                            continue;
-                        }
+                            $domain = UrlHelper::getDomainFromUrl($pageLinkReady);
+                            if (empty(trim($domain))) {
+                                continue;
+                            }
 
-                        if (!UrlHelper::isValidDomainName($domain)) {
-                            continue;
-                        }
+                            if (!UrlHelper::isValidDomainName($domain)) {
+                                continue;
+                            }
 
-                        if (UrlHelper::isSubDomainName($domain)) {
-                            continue;
-                        }
+                            if (UrlHelper::isSubDomainName($domain)) {
+                                continue;
+                            }
 
-                        $findDomain = Domain::where('domain', $domain)->first();
-                        if ($findDomain == null) {
-                            echo 'Save new domain: ' . $domain . "\n";
-                            $findDomain = new Domain();
-                            $findDomain->domain = $domain;
-                        }
+                            $findDomain = Domain::where('domain', $domain)->first();
+                            if ($findDomain == null) {
+                                echo 'Save new domain: ' . $domain . "\n";
+                                $findDomain = new Domain();
+                                $findDomain->domain = $domain;
+                            }
 
-                        $findDomain->save();
+                            $findDomain->save();
 
-                        $findWebsiteLink = WebsiteLink::where('website_link', $pageLinkReady)->first();
-                        if ($findWebsiteLink == null) {
-                            $findWebsiteLink = new WebsiteLink();
-                            echo 'Save new website link: ' . $pageLinkReady . "\n";
-                            $findWebsiteLink->website_link = $pageLinkReady;
-                        }
-                        $findWebsiteLink->save();
+                            $findWebsiteLink = WebsiteLink::where('website_link', $pageLinkReady)->first();
+                            if ($findWebsiteLink == null) {
+                                $findWebsiteLink = new WebsiteLink();
+                                echo 'Save new website link: ' . $pageLinkReady . "\n";
+                                $findWebsiteLink->website_link = $pageLinkReady;
+                            }
+                            $findWebsiteLink->save();
 
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+                        }
+                    } catch (\Exception $e) {
+                        echo 'Error: ' . $e->getMessage() . "\n";
                     }
-                } catch (\Exception $e) {
-                    echo 'Error: ' . $e->getMessage() . "\n";
-                }
 
+                }
             }
 
         });
