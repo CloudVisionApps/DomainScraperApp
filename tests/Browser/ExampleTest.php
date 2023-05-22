@@ -38,7 +38,6 @@ class ExampleTest extends DuskTestCase
 
                 try {
                     $browser->visit($websiteLink->website_link);
-                    $browser->pause(1000);
 
                     // Mark as scraped
                     $websiteLink->website_last_scrape_date = Carbon::now();
