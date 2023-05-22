@@ -31,7 +31,8 @@ class WebsiteLinkResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('website_link')
+                Tables\Columns\TextColumn::make('website_last_scrape_date'),
+                Tables\Columns\TextColumn::make('website_link'),
             ])
             ->filters([
                 //

@@ -17,23 +17,39 @@ class ExampleTest extends DuskTestCase
      */
     public function testBasicExample(): void
     {
+        $findWebsiteLink = WebsiteLink::where('website_link', 'https://www.bgtop.net/')->first();
+        if ($findWebsiteLink == null) {
+            $findWebsiteLink = new WebsiteLink();
+            $findWebsiteLink->website_link = 'https://www.bgtop.net/';
+            $findWebsiteLink->save();
+        }
+
         $this->browse(function (Browser $browser) {
 
-            $links = [];
-            $getDomains = Domain::all();
-            foreach ($getDomains as $domain) {
-                $links[] = 'https://' . $domain->domain;
-            }
-            $getWebsiteLinks = WebsiteLink::limit(500)->orderBy('id', 'desc')->get();
-            foreach ($getWebsiteLinks as $websiteLink) {
-                $links[] = $websiteLink->website_link;
-            }
+            $getWebsiteLinks = WebsiteLink::limit(500)
+                ->where(function ($query) {
+                    $query->whereNull('website_last_scrape_date')
+                        ->orWhere('website_last_scrape_date', '<', Carbon::now()->subDays(1));
+                })
+                ->orderBy('id', 'desc')
+                ->get();
 
-            foreach ($links as $link) {
+            foreach ($getWebsiteLinks as $websiteLink) {
 
                 try {
-                    $browser->visit($link);
+                    $browser->visit($websiteLink->website_link);
                     $browser->pause(1000);
+
+                    // Mark as scraped
+                    $websiteLink->website_last_scrape_date = Carbon::now();
+                    $websiteLink->save();
+
+                    $websiteLinkDomain = UrlHelper::getDomainFromUrl($websiteLink->website_link);
+                    if (empty(trim($websiteLinkDomain))) {
+                        continue;
+                    }
+                    $websiteLinkDomain = 'https://' . $websiteLinkDomain;
+
                     $pageLinks = $browser->elements('a');
                     foreach ($pageLinks as $pageLink) {
 
@@ -42,12 +58,11 @@ class ExampleTest extends DuskTestCase
                         } else {
                             $href = $pageLink->getAttribute('href');
                             if (strpos($href, '/') !== false) {
-                                $pageLinkReady = $link . $href;
+                                $pageLinkReady = $websiteLinkDomain . $href;
                             } else {
-                                $pageLinkReady = $link . '/' . $href;
+                                $pageLinkReady = $websiteLinkDomain .'/'. $href;
                             }
                         }
-
 ///////////////////////////////////////////////////////////////////////////////////
 
                         $domain = UrlHelper::getDomainFromUrl($pageLinkReady);
@@ -78,8 +93,6 @@ class ExampleTest extends DuskTestCase
                             echo 'Save new website link: ' . $pageLinkReady . "\n";
                             $findWebsiteLink->website_link = $pageLinkReady;
                         }
-
-                        $findWebsiteLink->website_last_scrape_date = Carbon::now();
                         $findWebsiteLink->save();
 
 ///////////////////////////////////////////////////////////////////////////////////
