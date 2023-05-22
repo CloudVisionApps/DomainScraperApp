@@ -55,8 +55,29 @@ class ExampleTest extends DuskTestCase
                         }
                         $websiteLinkDomain = 'https://' . $websiteLinkDomain;
 
+
+                        $pageLinksReady = [];
                         $pageLinks = $browser->elements('a');
                         foreach ($pageLinks as $pageLink) {
+
+                            $parseTextPageLink = $pageLink->getText();
+                            if (strpos($parseTextPageLink, '.com') !== false) {
+                                $pageLinksReady[md5($parseTextPageLink)] = $parseTextPageLink;
+                            }
+                            $parseTextPageLink = $pageLink->getText();
+                            if (strpos($parseTextPageLink, '.bg') !== false) {
+                                $pageLinksReady[md5($parseTextPageLink)] = $parseTextPageLink;
+                            }
+                            $parseTextPageLink = $pageLink->getText();
+                            if (strpos($parseTextPageLink, '.net') !== false) {
+                                $pageLinksReady[md5($parseTextPageLink)] = $parseTextPageLink;
+                            }
+                            $parseTextPageLink = $pageLink->getText();
+                            if (strpos($parseTextPageLink, '.org') !== false) {
+                                $pageLinksReady[md5($parseTextPageLink)] = $parseTextPageLink;
+                            }
+
+
 
                             if (strpos($pageLink->getAttribute('href'), 'http') !== false) {
                                 $pageLinkReady = $pageLink->getAttribute('href');
@@ -68,6 +89,11 @@ class ExampleTest extends DuskTestCase
                                     $pageLinkReady = $websiteLinkDomain . '/' . $href;
                                 }
                             }
+                            $pageLinksReady[md5($pageLinkReady)] = $pageLinkReady;
+                        }
+
+                        foreach ($pageLinksReady as $pageLinkReady) {
+
 ///////////////////////////////////////////////////////////////////////////////////
 
                             $domain = UrlHelper::getDomainFromUrl($pageLinkReady);

@@ -4,6 +4,7 @@ namespace App;
 
 use App\Models\Domain;
 use App\Models\WebsiteLink;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 
 class ScrapDomainAndLinks
@@ -14,17 +15,29 @@ class ScrapDomainAndLinks
 
             echo 'Scraping: ' . $link . "\n";
 
+            $findWebsiteLink = WebsiteLink::where('website_link', $link)->first();
+            if ($findWebsiteLink == null) {
+                // Mark as scraped
+                $saveWebsiteLink = new WebsiteLink();
+                $saveWebsiteLink->website_link = $link;
+                $saveWebsiteLink->save();
+            } else {
+                $findWebsiteLink->website_last_scrape_date = Carbon::now();
+                $findWebsiteLink->save();
+            }
+
             $client = new Client(['base_uri' => $link]);
             $getRequest = $client->request('GET');
             $content = $getRequest->getBody()->getContents();
 
+            $regexUrlsCleaned = ScraperHelper::getDomainsFromContent($content);
+
             libxml_use_internal_errors(true);
 
+            $dom = new \DOMDocument();
+            $dom->loadHTML( $content);
 
             echo 'Parsing: ' . $link . "\n";
-
-            $dom = new \DOMDocument();
-            $dom->loadHTML('<!DOCTYPE html><meta charset="UTF-8">' . $content);
 
             foreach ($dom->getElementsByTagName('a') as $node) {
                 $href = $node->getAttribute('href');

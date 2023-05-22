@@ -31,19 +31,21 @@ class ScrapDomains extends Command
      */
     public function handle()
     {
+
+        $link = 'https://bgtop.net/category/0/720/';
+        \App\ScrapDomainAndLinks::scrap($link);
+
+        return;
+
+
         while (true) {
-            $links = [];
-            $getDomains = Domain::all();
-            foreach ($getDomains as $domain) {
-                $links[] = 'https://' . $domain->domain;
-            }
             $getWebsiteLinks = WebsiteLink::all();
             foreach ($getWebsiteLinks as $websiteLink) {
-                $links[] = $websiteLink->website_link;
-            }
-            foreach ($links as $link) {
-                \App\ScrapDomainAndLinks::scrap($link);
+
+                \App\ScrapDomainAndLinks::scrap($websiteLink->website_link);
+
                 sleep(rand(1,4));
+
             }
         }
 
