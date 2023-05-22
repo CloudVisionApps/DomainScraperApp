@@ -32,16 +32,17 @@ class ExampleTest extends DuskTestCase
                         $query->whereNull('website_last_scrape_date')
                             ->orWhere('website_last_scrape_date', '<', Carbon::now()->subDays(1));
                     })
-                    ->orderBy('id', 'desc')
+                    ->orderBy('id', 'asc')
                     ->get();
 
                 foreach ($getWebsiteLinks as $websiteLink) {
 
-                    if (strpos($websiteLink->website_link, 'facebook.com') !== false) {
-                        continue;
-                    }
-
                     try {
+                        if (strpos($websiteLink->website_link, 'facebook.com') !== false) {
+                            $websiteLink->delete();
+                            continue;
+                        }
+
                         $browser->visit($websiteLink->website_link);
 
                         // Mark as scraped
