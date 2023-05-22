@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('website_link_type')->nullable();
             $table->text('website_link_status')->nullable();
             $table->text('website_link_status_code')->nullable();
+            $table->timestamp('website_last_scrape_date')->nullable();
             $table->integer('domain_id')->nullable();
             $table->timestamps();
         });

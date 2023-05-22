@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('domain_registrar')->nullable();
             $table->text('domain_registrar_url')->nullable();
             $table->text('domain_whois_server')->nullable();
+            $table->timestamp('domain_last_scrape_date')->nullable();
             $table->timestamps();
         });
     }
