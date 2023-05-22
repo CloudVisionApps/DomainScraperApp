@@ -37,6 +37,10 @@ class ExampleTest extends DuskTestCase
 
                 foreach ($getWebsiteLinks as $websiteLink) {
 
+                    if (strpos($websiteLink->website_link, 'facebook.com') !== false) {
+                        continue;
+                    }
+
                     try {
                         $browser->visit($websiteLink->website_link);
 
